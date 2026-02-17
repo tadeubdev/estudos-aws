@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+APP_DIR="/home/ec2-user/app"
+while read oldrev newrev ref
+do
+    branch=$(git rev-parse --symbolic --abbrev-ref $ref)
+    if [ "$branch" = "main" ]; then
+        git --work-tree=$APP_DIR checkout -f main
+        cd "$APP_DIR"
+        docker build -t app-node:latest .
+        docker rm -f app-node 2>/dev/null || true
+        docker run -d --name app-node --restart unless-stopped -p 127.0.0.1:3000:3000 app-node:latest
+    fi
+done
