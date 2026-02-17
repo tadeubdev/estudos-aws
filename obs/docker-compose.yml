@@ -1,6 +1,6 @@
 services:
   prometheus:
-    image: prom/prometheus:v2.54.1
+    build: ./prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=7d
@@ -10,9 +10,11 @@ services:
     ports:
       - "127.0.0.1:9090:9090"
     restart: unless-stopped
+    networks:
+      - obs-net
 
   grafana:
-    image: grafana/grafana:11.1.0
+    build: ./grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -21,9 +23,11 @@ services:
     ports:
       - "127.0.0.1:3001:3000"
     restart: unless-stopped
+    networks:
+      - obs-net
 
   node-exporter:
-    image: prom/node-exporter:v1.8.2
+    build: ./node-exporter
     command:
       - --path.rootfs=/host
     pid: host
@@ -32,9 +36,11 @@ services:
     ports:
       - "127.0.0.1:9100:9100"
     restart: unless-stopped
+    networks:
+      - obs-net
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    build: ./cadvisor
     privileged: true
     devices:
       - /dev/kmsg:/dev/kmsg
@@ -46,6 +52,8 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     restart: unless-stopped
+    networks:
+      - obs-net
 
 volumes:
   prom_data:

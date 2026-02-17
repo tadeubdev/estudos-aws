@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+BASE_DIR="/home/ec2-user/app"
 APP_DIR="/home/ec2-user/app/app"
 OBS_DIR="/home/ec2-user/app/obs"
 
@@ -9,7 +10,7 @@ do
   branch=$(git rev-parse --symbolic --abbrev-ref $ref)
   if [ "$branch" = "main" ]; then
     # Pull the latest code and build the Docker image
-    git --work-tree=$APP_DIR checkout -f main
+    git --work-tree=$BASE_DIR checkout -f main
 
     # Build and run the Docker container
     cd "$APP_DIR"
@@ -22,9 +23,16 @@ do
     # Run the obs container
     cd "$OBS_DIR"
     echo "Running the Docker container for the obs service..."
-    # Build the Docker image and run the container
-    docker build -t obs:latest .
-    docker rm -f obs 2>/dev/null || true
-    docker run -d --name obs --restart unless-stopped obs:latest
+    # Build all obs
+    docker build -t obs-prometheus:latest prometheus
+    docker build -t obs-grafana:latest grafana
+    docker build -t obs-node-exporter:latest node-exporter
+    docker build -t obs-cadvisor:latest cadvisor
+    # Run the containers
+    docker rm -f obs-prometheus obs-grafana obs-node-exporter obs-cadvisor 2>/dev/null || true
+    docker run -d --name obs-prometheus --restart unless-stopped -p 127.0.0.1:9090:9090 obs-prometheus:latest
+    docker run -d --name obs-grafana --restart unless-stopped -p 127.0.0.1:3001:3000 obs-grafana:latest
+    docker run -d --name obs-node-exporter --restart unless-stopped -p 127.0.0.1:9100:9100 obs-node-exporter:latest
+    docker run -d --name obs-cadvisor --restart unless-stopped -p 127.0.0.1:8080:8080 obs-cadvisor:latest
   fi
 done
