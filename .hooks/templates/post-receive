@@ -1,15 +1,30 @@
 #!/usr/bin/env bash
 set -e
 
-APP_DIR="/home/ec2-user/app"
+APP_DIR="/home/ec2-user/app/app"
+OBS_DIR="/home/ec2-user/app/obs"
+
 while read oldrev newrev ref
 do
-    branch=$(git rev-parse --symbolic --abbrev-ref $ref)
-    if [ "$branch" = "main" ]; then
-        git --work-tree=$APP_DIR checkout -f main
-        cd "$APP_DIR"
-        docker build -t app-node:latest .
-        docker rm -f app-node 2>/dev/null || true
-        docker run -d --name app-node --restart unless-stopped -p 127.0.0.1:3000:3000 app-node:latest
-    fi
+  branch=$(git rev-parse --symbolic --abbrev-ref $ref)
+  if [ "$branch" = "main" ]; then
+    # Pull the latest code and build the Docker image
+    git --work-tree=$APP_DIR checkout -f main
+
+    # Build and run the Docker container
+    cd "$APP_DIR"
+    echo "Building and running the Docker container for the app-node service..."
+    # Build the Docker image and run the container
+    docker build -t app-node:latest .
+    docker rm -f app-node 2>/dev/null || true
+    docker run -d --name app-node --restart unless-stopped -p 127.0.0.1:3000:3000 app-node:latest
+
+    # Run the obs container
+    cd "$OBS_DIR"
+    echo "Running the Docker container for the obs service..."
+    # Build the Docker image and run the container
+    docker build -t obs:latest .
+    docker rm -f obs 2>/dev/null || true
+    docker run -d --name obs --restart unless-stopped obs:latest
+  fi
 done
