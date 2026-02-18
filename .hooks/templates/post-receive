@@ -24,6 +24,12 @@ do
     cd "$OBS_DIR"
     echo "Running the Docker container for the obs service..."
     docker network create obs-net 2>/dev/null || true
-    docker compose up -d --build
+    docker build -t obs-prometheus:latest ./prometheus
+    docker build -t obs-grafana:latest ./grafana
+    docker build -t obs-node-exporter:latest ./node-exporter
+    docker build -t obs-cadvisor:latest ./cadvisor
+    docker-compose down
+    docker-compose up -d
+    docker ps
   fi
 done

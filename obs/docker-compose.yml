@@ -1,6 +1,6 @@
 services:
   prometheus:
-    build: ./prometheus
+    image: obs-prometheus:latest
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=7d
@@ -14,7 +14,7 @@ services:
       - obs-net
 
   grafana:
-    build: ./grafana
+    image: obs-grafana:latest
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -27,7 +27,7 @@ services:
       - obs-net
 
   node-exporter:
-    build: ./node-exporter
+    image: obs-node-exporter:latest
     command:
       - --path.rootfs=/host
     pid: host
@@ -40,7 +40,7 @@ services:
       - obs-net
 
   cadvisor:
-    build: ./cadvisor
+    image: obs-cadvisor:latest
     privileged: true
     devices:
       - /dev/kmsg:/dev/kmsg
@@ -58,3 +58,7 @@ services:
 volumes:
   prom_data:
   graf_data:
+
+networks:
+  obs-net:
+    driver: bridge
