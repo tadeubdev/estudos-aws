@@ -12,22 +12,10 @@ do
     # Pull the latest code and build the Docker image
     git --work-tree=$BASE_DIR checkout -f main
 
-    # Build and run the Docker container
-    cd "$APP_DIR"
-    echo "Building and running the Docker container for the app-node service..."
-    # Build the Docker image and run the container
-    docker build -t app-node:latest .
-    docker rm -f app-node 2>/dev/null || true
-    docker run -d --name app-node --restart unless-stopped -p 127.0.0.1:3000:3000 app-node:latest
-
     # Run the obs container
     cd "$OBS_DIR"
     echo "Running the Docker container for the obs service..."
     docker network create obs-net 2>/dev/null || true
-    docker build -t obs-prometheus:latest ./prometheus
-    docker build -t obs-grafana:latest ./grafana
-    docker build -t obs-node-exporter:latest ./node-exporter
-    docker build -t obs-cadvisor:latest ./cadvisor
     docker-compose down
     docker-compose up -d
     docker ps
