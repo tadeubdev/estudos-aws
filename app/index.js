@@ -55,6 +55,8 @@ app.get('/', (req, res) => {
   res.send('AWS lab running 🚀');
 });
 
+app.get('/boom', (req, res) => res.status(500).send('boom'));
+
 app.listen(3000, '0.0.0.0', () => {
   console.log('Server running on port 3000');
 });

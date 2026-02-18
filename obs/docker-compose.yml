@@ -55,6 +55,14 @@ services:
     networks:
       - obs-net
 
+  app-node:
+    image: app-node:latest
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    networks:
+      - obs-net
+
 volumes:
   prom_data:
   graf_data:
